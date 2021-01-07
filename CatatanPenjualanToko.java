@@ -9,6 +9,7 @@ public class CatatanPenjualanToko{
 		ArrayList<Integer> banyakList = new ArrayList<Integer>(); //deklarasi arraylist banyaknya masukkan barang	
 		ArrayList<Integer> hargaList = new ArrayList<Integer>(); //deklarasi arraylist harga barang persatuan	
 		ArrayList<String> riwayat = new ArrayList<String>(); //deklarasi arraylist riwayat
+		ArrayList<String> satuanBerat = new ArrayList<String>(); //deklarasi arraylist satuan berat
 		long pendapatanWarung = 0;		
 
 		Scanner scan = new Scanner(System.in); //deklarasi scanner		
@@ -31,6 +32,7 @@ public class CatatanPenjualanToko{
 			
 			System.out.println();
 
+
 			switch(pilih) {
 				case "1":
 					boolean cek2 = true;
@@ -45,12 +47,26 @@ public class CatatanPenjualanToko{
 						if(pilih.equals("1")){
 							System.out.print("Nama barang: ");
 							String inputBarang = scan.nextLine().toLowerCase();
+							
+							System.out.print("Satuan barang (Kg/liter/pcs): " );
+							String inputSatuan = scan.nextLine().toLowerCase();
+
 							System.out.print("Banyaknya: ");						
 							String banyakInput = scan.nextLine();
-							System.out.print("Harga per pcs atau per kg: ");
-							String hargaBarang = scan.nextLine();
+							// System.out.println(" " + satuanBerat.get(satuanBerat.size()-1));
+
+							String hargaBarang = "";
+							if (!(list.contains(inputBarang) && inputBarang.length() <= 20 && banyakInput.length() <= 6 && hargaBarang.length() <= 6 && (isAllDigit(banyakInput) && isAllDigit(hargaBarang))  && (inputSatuan.equalsIgnoreCase("pcs") || inputSatuan.equalsIgnoreCase("liter") || inputSatuan.equalsIgnoreCase("kg")))) {
+								System.out.print("Harga per pcs atau per kg: " );
+								hargaBarang = scan.nextLine();
+								// System.out.println(" " + satuanBerat.get(satuanBerat.size()-1));	
+							}
 							
-							if (!isAllDigit(banyakInput) || !isAllDigit(hargaBarang)) {
+							
+							if (!inputSatuan.equalsIgnoreCase("pcs") && !inputSatuan.equalsIgnoreCase("liter") && !inputSatuan.equalsIgnoreCase("kg")) {
+								System.out.println("Satuan Berat Tidak Sesuai!");
+							}
+							else if (!isAllDigit(banyakInput) || !isAllDigit(hargaBarang) || hargaBarang.equals("0") || banyakInput.equals("0")) {
 								System.out.println("\nMasukan BANYAK BARANG dan HARGA BARANG Harus Berupa ANGKA dan LEBIH DARI NOL (0)!!!\n");
 							} else if (inputBarang.length() > 20) {
 								System.out.println("\nNama Barang TIDAK BOLEH lebih dari 20 karakter\n");
@@ -58,10 +74,26 @@ public class CatatanPenjualanToko{
 								System.out.println("\nJumlah barang TIDAK BOLEH MELEBIHI 999.999!!!\n");
 							} else if (hargaBarang.length() > 6) {
 								System.out.println("\nHarga barang TIDAK BOLEH MELEBIHI 999.999!!!\n");
-							} else {
+							} else if (list.contains(inputBarang)) {
+								int tambahinBarang = banyakList.get(list.indexOf(inputBarang)) + Integer.parseInt(banyakInput);
+								banyakList.set(list.indexOf(inputBarang), tambahinBarang);
+								
+								System.out.println("\nProses BERHASIL!\n");
+
+							}else {
 								list.add(inputBarang.toLowerCase());
 								banyakList.add(Integer.parseInt(banyakInput));
 								hargaList.add(Integer.parseInt(hargaBarang));
+
+								if(inputSatuan.equalsIgnoreCase("kg")){
+									satuanBerat.add("Kg");
+								}
+								else if(inputSatuan.equalsIgnoreCase("liter")){
+									satuanBerat.add("Liter");
+								}
+								else if(inputSatuan.equalsIgnoreCase("pcs")){
+									satuanBerat.add("Pcs");
+								}
 
 								System.out.println("\nProses BERHASIL!\n");
 							}
@@ -97,7 +129,7 @@ public class CatatanPenjualanToko{
 								System.out.print("Banyak terjualnya: ");
 								banyakTerjual = scan.nextLine();
 
-								if (!isAllDigit(banyakTerjual)) {
+								if (!isAllDigit(banyakTerjual) || banyakTerjual.equals("0")) {
 									System.out.println("\nBanyak terjual harus Berupa ANGKA!!!\n");
 								} else if (!list.contains(barangTerjual)) {
 									System.out.println("\nBarang tidak tersedia\n");
@@ -112,7 +144,7 @@ public class CatatanPenjualanToko{
 									banyakList.set(cekIndex, kuranginStok);
 									
 									pendapatanWarung += (long)hargaSatuan * (long)Integer.parseInt(banyakTerjual);
-									String riwayatPenjualan = String.format("|%s| %-20s | %-6s | %-9s | %-13s|", waktu, barangTerjual, banyakTerjual, "Rp " + hargaSatuan, "Rp " + ((long)hargaSatuan * (long)Integer.parseInt(banyakTerjual)) );
+									String riwayatPenjualan = String.format("|%s| %-20s | %-6s | %-9s | %-13s|", waktu, barangTerjual, banyakTerjual + " "+ satuanBerat.get(cekIndex), "Rp " + hargaSatuan, "Rp " + ((long)hargaSatuan * (long)Integer.parseInt(banyakTerjual)) );
 									riwayat.add(riwayatPenjualan);	
 
 									
@@ -144,7 +176,7 @@ public class CatatanPenjualanToko{
 					Long hargaStock = (long)0;
 					for(int i = 0; i < list.size(); i++){	
 						hargaStock += ((long)banyakList.get(i) * (long)hargaList.get(i));
-						System.out.println(String.format("| %-2d | %-20s | %-13d | %-12s | %-17s |", (i+1), list.get(i), banyakList.get(i), "Rp " + hargaList.get(i), "Rp "+ ((long)banyakList.get(i) * (long)hargaList.get(i)) ));				
+						System.out.println(String.format("| %-2d | %-20s | %-13s | %-12s | %-17s |", (i+1), list.get(i), banyakList.get(i) + " " + satuanBerat.get(i), "Rp " + hargaList.get(i), "Rp "+ ((long)banyakList.get(i) * (long)hargaList.get(i)) ));				
 					}
 					System.out.println("--------------------------------------------------------------------------------");
 					System.out.println("\t\t\tTotal Harga Stock \t Rp " + hargaStock);
